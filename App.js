@@ -1,8 +1,9 @@
 
 import React from 'react';
 import {Component} from 'react';
-import { StyleSheet, Text, View ,TextInput,TouchableOpacity} from 'react-native';
+import { StyleSheet, Text, View ,TextInput,TouchableOpacity, Alert} from 'react-native';
 import AppHeader from './AppHeader'
+import dictionary from './database';
 
 export default class App extends React.Component {
  constructor(){
@@ -11,41 +12,65 @@ export default class App extends React.Component {
      text:'',
      isSearchPressed:false,
      word:'',
+     wordFromData:'',
+     definitions:''
    
    }
  }
-  getWord=(word)=>{
-    var  searchKeyWord=word.toLowerCase()
-    var url="https://rupinwhitehatjr.github.io/dictionary/"+searchKeyWord+".json"
-    // console.log(url)
-    return fetch(url)
-    .then((data) =>{
-      if(data.status===200){
-        return data.json()
-      }else{
-        return null
-      }
-    })
-    .then((response)=>{
-      var responseObject = response
+  // getWord=(word)=>{
+  //   var  searchKeyWord=word.toLowerCase()
+  //   var url="https://rupinwhitehatjr.github.io/dictionary/"+searchKeyWord+".json"
+  //   // console.log(url)
+  //   return fetch(url)
+  //   .then((data) =>{
+  //     if(data.status===200){
+  //       return data.json()
+  //     }else{
+  //       return null
+  //     }
+  //   })
+  //   .then((response)=>{
+  //     var responseObject = response
 
-      if(responseObject){
-        var wordData = responseObject.definitions[0]
-        var definition = wordData.description
-        var lexicalCategory=wordData.wordtype
+  //     if(responseObject){
+  //       var wordData = responseObject.definitions[0]
+  //       var definition = wordData.description
+  //       var lexicalCategory=wordData.wordtype
 
-        this.setState({
-          "word":this.state.text,
-          "definition":definition,
-          "lexicalCategory": lexicalCategory
-        })
-      }else{
-        this.setState({
-          "word":this.state.text,
-          "definition":"Not Found"
-        })
-      }
-    })
+  //       this.setState({
+  //         "word":this.state.text,
+  //         "definition":definition,
+  //         "lexicalCategory": lexicalCategory
+  //       })
+  //     }else{
+  //       this.setState({
+  //         "word":this.state.text,
+  //         "definition":"Not Found"
+  //       })
+  //     }
+  //   })
+  // }
+
+  getWord=(text)=>{
+    var  text = text.toLowerCase()
+    try{
+      var word = dictionary[text]["word"]
+      var lexicalCategory = dictionary[text]["lexicalCategory"]
+      var definition = dictionary[text]["definition"]
+      this.setState({
+        "word":word,
+        "lexicalCategory":lexicalCategory,
+        "definition": definition  
+      })
+    }
+    catch(err){
+     Alert.alert("SORRY THIS WORD IS NOT THERE IN OUR DATABASE")
+     this.setState({
+       "text":'',
+       "isSearchPressed":false
+     })
+    }
+  
   }
   render(){
     return (
@@ -63,10 +88,8 @@ export default class App extends React.Component {
         }} 
           value={this.state.text}/>
   
-        <TouchableOpacity style={styles.button} onPress={()=>{
-          this.setState({isSearchPressed:true});
-          this.setState(this.state.text)
-        }}>
+        <TouchableOpacity style={styles.button}
+        onPress={this.getWord}>
           <Text style={styles.anyText}>Search</Text>
           </TouchableOpacity>
 
